@@ -1,0 +1,9 @@
+{
+	"name": "adf-shir-shruti",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "13317dc4-d74f-4367-9c3d-1c85a720d230",
+		"tenantId": "e4e34038-ea1f-4882-b6e8-ccd776459ca0"
+	}
+}
