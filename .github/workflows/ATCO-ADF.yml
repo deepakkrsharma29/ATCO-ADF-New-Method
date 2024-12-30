@@ -40,7 +40,11 @@ jobs:
         name: ExportedArmTemplate
         path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
 
-    # Add these steps to commit and push
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.PAT_TOKEN }}  # PAT with repo access
+
     - name: Commit and push changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
