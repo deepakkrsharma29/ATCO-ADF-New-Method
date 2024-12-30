@@ -28,20 +28,20 @@ jobs:
       working-directory: ${{github.workspace}}/ADFroot/build
       
     - name: Debug Current Directory Structure Before Export
-       run: |
-         echo "Current directory structure:"
-         ls -R ${{github.workspace}}/ADFroot/
+      run: |
+        echo "Current directory structure:"
+        ls -R ${{github.workspace}}/ADFroot/
         
     - name: Validate and Generate ARM template
       run: npm run build export ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti "ExportedArmTemplate"
       working-directory: ${{github.workspace}}/ADFroot/build
       
     - name: Debug Directory Structure After Export
-       run: |
-         echo "Directory structure after export:"
-         ls -R ${{github.workspace}}/ADFroot/
-         echo "Build directory contents:"
-         ls -R ${{github.workspace}}/ADFroot/build/
+      run: |
+        echo "Directory structure after export:"
+        ls -R ${{github.workspace}}/ADFroot/
+        echo "Build directory contents:"
+        ls -R ${{github.workspace}}/ADFroot/build/
         
     - name: Commit and push changes
       run: |
