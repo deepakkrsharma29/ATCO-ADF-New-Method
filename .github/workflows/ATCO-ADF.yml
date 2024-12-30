@@ -18,40 +18,36 @@ jobs:
       uses: actions/setup-node@v3.4.1
       with:
         node-version: 18.x
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
         
-    - name: install ADF Utilities package
-      run: npm install
+    # Add cache for node_modules
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+        
+    - name: Clean install dependencies
+      run: npm ci
       working-directory: ${{github.workspace}}/ADFroot/build
       
     - name: Validate
       run: npm run build validate ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti
       working-directory: ${{github.workspace}}/ADFroot/build
       
-    - name: Debug Current Directory Structure Before Export
-      run: |
-        echo "Current directory structure:"
-        ls -R ${{github.workspace}}/ADFroot/
-        
     - name: Validate and Generate ARM template
       run: npm run build export ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti "ExportedArmTemplate"
       working-directory: ${{github.workspace}}/ADFroot/build
       
-    - name: Debug Directory Structure After Export
-      run: |
-        echo "Directory structure after export:"
-        ls -R ${{github.workspace}}/ADFroot/
-        echo "Build directory contents:"
-        ls -R ${{github.workspace}}/ADFroot/build/
-        
     - name: Commit and push changes
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        echo "Git status before add:"
-        git status
         find ${{github.workspace}}/ADFroot -name "*.json" -o -name "*.ps1" | while read file; do git add "$file"; done
-        echo "Git status after add:"
-        git status
         git commit -m "Update ARM templates [skip ci]" || echo "No changes to commit"
         git push origin main || echo "No changes to push"
       env:
