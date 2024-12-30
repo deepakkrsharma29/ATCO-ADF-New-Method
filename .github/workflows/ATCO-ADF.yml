@@ -40,12 +40,15 @@ jobs:
         name: ExportedArmTemplate
         path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
 
-    - name: Debug Export Directory
-      run: ls -R ${{github.workspace}}/actions
-      
-    # - name: Verify Upload
-    #   run: echo "Artifact upload completed successfully."
-
+    # Add these steps to commit and push
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
+        git commit -m "Update ARM templates [skip ci]"
+        git push
+        
       # - name: Commit Exported Files
       #   run: |
       #     git config --global user.name "Deepak Sharma"
