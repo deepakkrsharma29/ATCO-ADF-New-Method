@@ -35,21 +35,21 @@ jobs:
       run: ls -R ${{github.workspace}}/ADFroot/build
 
     - name: upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4.5.0
       with:
         name: ExportedArmTemplate
-        path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/
+        path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
       
-    - name: Verify Upload
-      run: echo "Artifact upload completed successfully."
+    # - name: Verify Upload
+    #   run: echo "Artifact upload completed successfully."
 
-      - name: Commit Exported Files
-        run: |
-          git config --global user.name "Deepak Sharma"
-          git config --global user.email "deepakkrsharma29@gmail.com"
-          git add ${{ github.workspace }}/ADFroot/build/ExportedArmTemplate/
-          git commit -m "Add Exported ARM Templates"
-          git push    
+      # - name: Commit Exported Files
+      #   run: |
+      #     git config --global user.name "Deepak Sharma"
+      #     git config --global user.email "deepakkrsharma29@gmail.com"
+      #     git add ${{ github.workspace }}/ADFroot/build/ExportedArmTemplate/
+      #     git commit -m "Add Exported ARM Templates"
+      #     git push    
 
 # - name: Commit Exported Files
     #   env:
