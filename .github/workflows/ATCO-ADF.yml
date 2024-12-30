@@ -45,7 +45,7 @@ jobs:
 
     - name: Commit Exported Files (Optional)
       run: |
-        git config --global user.name "Deepak Sharma"
+        git config --global user.name "DeepakSharma"
         git config --global user.email "deepakkrsharma29@gmail.com"
         git add ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/
         git commit -m "Add Exported ARM Templates"
