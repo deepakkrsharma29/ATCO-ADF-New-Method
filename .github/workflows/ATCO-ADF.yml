@@ -39,6 +39,9 @@ jobs:
       with:
         name: ExportedArmTemplate
         path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
+
+    - name: Debug Export Directory
+      run: ls -R ${{github.workspace}}/ATCO-ADF-New-Method/actions
       
     # - name: Verify Upload
     #   run: echo "Artifact upload completed successfully."
