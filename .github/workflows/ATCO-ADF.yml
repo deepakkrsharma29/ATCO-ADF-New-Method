@@ -43,15 +43,23 @@ jobs:
     - name: Verify Upload
       run: echo "Artifact upload completed successfully."
 
-    - name: Commit Exported Files
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: |
-        git config --global user.name "DeepakSharma"
-        git config --global user.email "deepakkrsharma29@gmail.com"
-        git add ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/
-        git commit -m "Add Exported ARM Templates"
-        git push https://$GITHUB_TOKEN@github.com/deepakkrsharma29/ATCO-ADF-New-Method.git
+      - name: Commit Exported Files
+        run: |
+          git config --global user.name "Deepak Sharma"
+          git config --global user.email "deepakkrsharma29@gmail.com"
+          git add ${{ github.workspace }}/ADFroot/build/ExportedArmTemplate/
+          git commit -m "Add Exported ARM Templates"
+          git push    
+
+# - name: Commit Exported Files
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+    #   run: |
+    #     git config --global user.name "DeepakSharma"
+    #     git config --global user.email "deepakkrsharma29@gmail.com"
+    #     git add ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/
+    #     git commit -m "Add Exported ARM Templates"
+    #     git push https://$GITHUB_TOKEN@github.com/deepakkrsharma29/ATCO-ADF-New-Method.git
 
 
 
