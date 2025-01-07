@@ -87,7 +87,7 @@ jobs:
           dataFactoryName: ADF-Prod-Chitransh # Target ADF name
           armTemplateFile: ARMTemplateForFactory.json # ARM template file name
           armTemplateParametersFile: ARMTemplateParametersForFactory.json # ARM template parameters file name
-          additionalParameters: 'dataFactoryName=ADF-Prod-Chitransh' # Additional parameters
+          # additionalParameters: 'dataFactoryName=ADF-Prod-Chitransh' # Additional parameters
 
 
 
