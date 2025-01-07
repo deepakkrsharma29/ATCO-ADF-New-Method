@@ -54,6 +54,11 @@ jobs:
           git push origin main || echo "No changes to push"
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      - name: Upload Exported ARM Template
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: ExportedArmTemplate
+          path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/      
 
   release:
     needs: build
@@ -81,6 +86,7 @@ jobs:
           armTemplateFile: ARMTemplateForFactory.json # ARM template file name
           armTemplateParametersFile: ARMTemplateParametersForFactory.json # ARM template parameters file name
           additionalParameters: 'dataFactoryName=ADF-Prod-Chitransh' # Additional parameters
+
 
 
 
