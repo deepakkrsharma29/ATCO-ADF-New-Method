@@ -1,0 +1,274 @@
+on:
+  push:
+    branches:
+      - main
+permissions:
+  id-token: write  # This is required for OIDC
+  contents: write
+  actions: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+      
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.4.1
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+          
+      # Add cache for node_modules
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+          
+      - name: Clean install dependencies
+        run: npm ci
+        working-directory: ${{github.workspace}}/ADFroot/build
+        
+      - name: Validate
+        run: npm run build validate ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti
+        working-directory: ${{github.workspace}}/ADFroot/build
+        
+      - name: Validate and Generate ARM template
+        run: npm run build export ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti "ExportedArmTemplate"
+        working-directory: ${{github.workspace}}/ADFroot/build
+        
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          find ${{github.workspace}}/ADFroot -name "*.json" -o -name "*.ps1" | while read file; do git add "$file"; done
+          git commit -m "Update ARM templates [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      
+      - name: Upload Exported ARM Template
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: ExportedArmTemplate
+          path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/      
+  
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      # Download the previously uploaded artifact
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: ExportedArmTemplate # Artifact name
+      
+      - name: Login via Az module
+        uses: Azure/login@v2.2.0
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true  # Add this line to enable PowerShell sessions
+          # client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          # tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          # subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          # lient-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          # auth-type: 'SERVICE_PRINCIPAL'
+      
+      - name: data-factory-deploy
+        uses: Azure/data-factory-deploy-action@v1.2.0
+        with:
+          resourceGroupName: RG-Chitransh-ADF # Target ADF resource group name
+          dataFactoryName: ADF-Prod-Chitransh # Target ADF name
+          armTemplateFile: ARMTemplateForFactory.json # ARM template file name
+          armTemplateParametersFile: ARMTemplateParametersForFactory.json # ARM template parameters file name
+          # additionalParameters: 'dataFactoryName=ADF-Prod-Chitransh' # Additional parameters
+
+
+
+
+
+
+
+
+# on:
+#   push:
+#     branches:
+#     - main
+
+# permissions:
+#   id-token: write
+#   contents: read
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-24.04
+#     steps:
+
+#     - uses: actions/checkout@v3
+    
+#     - name: Setup Node.js environment
+#       uses: actions/setup-node@v3.4.1
+#       with:
+#         node-version: 18.x
+
+#     - name: install ADF Utilities package
+#       run: npm install
+#       working-directory: ${{github.workspace}}/ADFroot/build
+
+#     - name: Validate
+#       run: npm run build validate ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti
+#       working-directory: ${{github.workspace}}/ADFroot/build
+
+#     - name: Validate and Generate ARM template
+#       run: npm run build export ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti "ExportedArmTemplate"
+#       working-directory: ${{github.workspace}}/ADFroot/build
+
+#     - name: Debug Build Directory
+#       run: ls -R ${{github.workspace}}/ADFroot/build
+
+#     - name: upload artifact
+#       uses: actions/upload-artifact@v4.5.0
+#       with:
+#         name: ExportedArmTemplate
+#         path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
+
+#     - name: Checkout repository
+#       uses: actions/checkout@v3
+#       with:
+#         token: ${{ secrets.PAT_TOKEN }}  # PAT with repo access
+
+#     - name: Debug file location
+#       run: |
+#         echo "Checking ExportedArmTemplate directory:"
+#         ls -la ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
+        
+#     - name: Commit and push changes
+#       run: |
+#         git config --local user.email "github-actions[bot]@users.noreply.github.com"
+#         git config --local user.name "github-actions[bot]"
+#         git status
+#         git add ${{github.workspace}}/ADFroot/build/ExportedArmTemplate || echo "Add failed"
+#         git status
+#         git commit -m "Update ARM templates [skip ci]" || echo "Commit failed"
+#         git push origin main || echo "Push failed"
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        
+      # - name: Commit Exported Files
+      #   run: |
+      #     git config --global user.name "Deepak Sharma"
+      #     git config --global user.email "deepakkrsharma29@gmail.com"
+      #     git add ${{ github.workspace }}/ADFroot/build/ExportedArmTemplate/
+      #     git commit -m "Add Exported ARM Templates"
+      #     git push    
+
+# - name: Commit Exported Files
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+    #   run: |
+    #     git config --global user.name "DeepakSharma"
+    #     git config --global user.email "deepakkrsharma29@gmail.com"
+    #     git add ${{github.workspace}}/ADFroot/build/ExportedArmTemplate/
+    #     git commit -m "Add Exported ARM Templates"
+    #     git push https://$GITHUB_TOKEN@github.com/deepakkrsharma29/ATCO-ADF-New-Method.git
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# on:
+#   push:
+#     branches:
+#     - main
+
+# permissions:
+#       id-token: write
+#       contents: read
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+
+#     - uses: actions/checkout@v3
+# # Installs Node and the npm packages saved in your package.json file in the build
+#     - name: Setup Node.js environment
+#       uses: actions/setup-node@v3.4.1
+#       with:
+#         node-version: 18.x
+        
+#     - name: install ADF Utilities package
+#       run: npm install
+#       working-directory: ${{github.workspace}}/ADFroot/build  # (1) provide the folder location of the package.json file
+        
+# # Validates all of the Data Factory resources in the repository. You'll get the same validation errors as when "Validate All" is selected.
+#     - name: Validate
+#       run: npm run build validate ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti # (2) The validate command needs the root folder location of your repository where all the objects are stored. And the 2nd parameter is the resourceID of the ADF instance 
+#       working-directory: ${{github.workspace}}/ADFroot/build
+ 
+
+#     - name: Validate and Generate ARM template
+#       run: npm run build export ${{github.workspace}}/ADFroot/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti "ExportedArmTemplate"  # (3) The build command, as validate, needs the root folder location of your repository where all the objects are stored. And the 2nd parameter is the resourceID of the ADF instance. The 3rd parameter is the exported ARM template artifact name 
+#       working-directory: ${{github.workspace}}/ADFroot/build
+ 
+# # In order to leverage the artifact in another job, we need to upload it with the upload action 
+#     - name: upload artifact
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: ExportedArmTemplate # (4) use the same artifact name you used in the previous export step
+#         path: ${{github.workspace}}/ADFroot/build/ExportedArmTemplate
+
+
+
+
+
+
+
+
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+
+#     - uses: actions/checkout@v3
+# # Installs Node and the npm packages saved in your package.json file in the build
+#     - name: Setup Node.js environment
+#       uses: actions/setup-node@v3.4.1
+#       with:
+#         node-version: 18.x
+        
+#     - name: install ADF Utilities package
+#       run: npm install
+#       working-directory: ${{github.workspace}}/build  # (1) provide the folder location of the package.json file
+        
+# # Validates all of the Data Factory resources in the repository. You'll get the same validation errors as when "Validate All" is selected.
+#     - name: Validate
+#       run: npm run build validate ${{github.workspace}}/ /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti # (2) The validate command needs the root folder location of your repository where all the objects are stored. And the 2nd parameter is the resourceID of the ADF instance 
+#       working-directory: ${{github.workspace}}/build/
+ 
+
+#     - name: Validate and Generate ARM template
+#       run: npm run build export ${{github.workspace}}/ARM /subscriptions/737d1672-96a9-4ba4-b12c-8027ef27ab4e/resourceGroups/rg-shruti/providers/Microsoft.DataFactory/factories/adf-shir-shruti "ExportedArmTemplate"  # (3) The build command, as validate, needs the root folder location of your repository where all the objects are stored. And the 2nd parameter is the resourceID of the ADF instance. The 3rd parameter is the exported ARM template artifact name 
+#       working-directory: ${{github.workspace}}/build
+ 
+# # In order to leverage the artifact in another job, we need to upload it with the upload action 
+#     - name: upload artifact
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: ExportedArmTemplate # (4) use the same artifact name you used in the previous export step
+#         path: ${{github.workspace}}/build/ExportedArmTemplate
