@@ -8,26 +8,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      # Install Codeium CLI
-      - name: Install Codeium
+      # Install Codeium CLI using npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Codeium CLI
         run: |
-          # Create a temporary directory for download
-          mkdir -p /tmp/codeium
-          cd /tmp/codeium
-          
-          # Download the latest release
-          curl -L -o codeium.zip https://github.com/Exafunction/codeium/releases/latest/download/codeium-cli-linux-amd64.zip
-          
-          # Unzip the package
-          unzip codeium.zip
-          
-          # Make it executable and move to a PATH location
-          chmod +x codeium-cli
-          sudo mv codeium-cli /usr/local/bin/codeium
-          
-          # Clean up
-          cd -
-          rm -rf /tmp/codeium
+          npm install -g @codeium/cli
           
       # Authenticate with Codeium
       - name: Authenticate Codeium
