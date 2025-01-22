@@ -1,19 +1,25 @@
-# Example GitHub Actions workflow with Codeium
+# GitHub Actions workflow with Codeium
 name: AI-Enhanced Pipeline
-
 on: [push, pull_request]
 
 jobs:
   code-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       # Install Codeium CLI
       - name: Install Codeium
         run: |
-          curl -L https://github.com/Exafunction/codeium/releases/download/cli-v0.1.7/codeium-cli-linux-amd64.tar.gz | tar xz
-          sudo mv codeium-cli /usr/local/bin/codeium
+          curl -fsSL https://codeium.com/install.sh | sh
+          echo "$HOME/.codeium/bin" >> $GITHUB_PATH
+          
+      # Authenticate with Codeium (you'll need to set up the API key)
+      - name: Authenticate Codeium
+        env:
+          CODEIUM_API_KEY: ${{ secrets.CODEIUM_API_KEY }}
+        run: |
+          codeium auth --api-key "$CODEIUM_API_KEY"
           
       # Run code analysis
       - name: Analyze Code
