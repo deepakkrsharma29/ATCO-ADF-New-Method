@@ -8,15 +8,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      # Install Codeium CLI using npm
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
+      # Install Codeium Enterprise CLI
       - name: Install Codeium CLI
         run: |
-          npm install -g @codeium/cli
+          wget https://download.codeium.com/enterprise-cli/latest/codeium_enterprise_cli_linux_amd64.tar.gz
+          tar -xzf codeium_enterprise_cli_linux_amd64.tar.gz
+          sudo mv codeium_enterprise_cli /usr/local/bin/codeium
+          chmod +x /usr/local/bin/codeium
+          
+      # Verify installation
+      - name: Verify Codeium Installation
+        run: codeium --version
           
       # Authenticate with Codeium
       - name: Authenticate Codeium
