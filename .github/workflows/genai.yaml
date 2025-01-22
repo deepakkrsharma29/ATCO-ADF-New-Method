@@ -11,10 +11,25 @@ jobs:
       # Install Codeium CLI
       - name: Install Codeium
         run: |
-          curl -fsSL https://codeium.com/install.sh | sh
-          echo "$HOME/.codeium/bin" >> $GITHUB_PATH
+          # Create a temporary directory for download
+          mkdir -p /tmp/codeium
+          cd /tmp/codeium
           
-      # Authenticate with Codeium (you'll need to set up the API key)
+          # Download the latest release
+          curl -L -o codeium.zip https://github.com/Exafunction/codeium/releases/latest/download/codeium-cli-linux-amd64.zip
+          
+          # Unzip the package
+          unzip codeium.zip
+          
+          # Make it executable and move to a PATH location
+          chmod +x codeium-cli
+          sudo mv codeium-cli /usr/local/bin/codeium
+          
+          # Clean up
+          cd -
+          rm -rf /tmp/codeium
+          
+      # Authenticate with Codeium
       - name: Authenticate Codeium
         env:
           CODEIUM_API_KEY: ${{ secrets.CODEIUM_API_KEY }}
