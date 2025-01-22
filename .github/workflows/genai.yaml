@@ -1,0 +1,26 @@
+# Example GitHub Actions workflow with Codeium
+name: AI-Enhanced Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  code-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Install Codeium CLI
+      - name: Install Codeium
+        run: |
+          curl -L https://github.com/Exafunction/codeium/releases/download/cli-v0.1.7/codeium-cli-linux-amd64.tar.gz | tar xz
+          sudo mv codeium-cli /usr/local/bin/codeium
+          
+      # Run code analysis
+      - name: Analyze Code
+        run: |
+          codeium analyze ./src
+          
+      # Generate tests
+      - name: Generate Tests
+        run: |
+          codeium generate-tests ./src
